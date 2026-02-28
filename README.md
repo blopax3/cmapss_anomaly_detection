@@ -6,8 +6,13 @@ This project builds an end-to-end **condition-monitoring** pipeline for turbofan
 - **Early anomaly detection** without failure labels  
 - A continuous, interpretable **Health Indicator (HI)** to summarize degradation over time
 
----
+## Paper
+A detailed write-up of the anomaly detection methodology and evaluation is included in this repository:
 
+- `paper.pdf` — **Early Fault Detection on C-MAPSS with Unsupervised LSTM Autoencoders**
+
+
+---
 ## 1) Unsupervised anomaly detection (sequence autoencoder)
 
 **Goal:** learn *normal* operating behavior from healthy cycles and flag sustained deviations as early signals of degradation.
@@ -19,10 +24,12 @@ This project builds an end-to-end **condition-monitoring** pipeline for turbofan
 - **Model:** an **LSTM autoencoder** (with an interchangeable **GRU** option) is trained to reconstruct healthy sequences by minimizing **MSE**.
 - **Anomaly score:** the **reconstruction error (window MSE)** is used as the anomaly score.
 - **Thresholding (automatic):** a statistical threshold is calibrated from the healthy training error distribution:
-  $$
-  \tau = \mu_{MSE} + 2.5 \cdot \sigma_{MSE}
-  $$
-  Windows above \(\tau\) are flagged as anomalous, enabling consistent comparison across engines and dataset splits.
+
+```math
+\tau = \mu_{\mathrm{MSE}} + 2.5 \cdot \sigma_{\mathrm{MSE}}
+```
+
+Windows above $\tau$ are flagged as anomalous, enabling consistent comparison across engines and dataset splits.
 
 ---
 
@@ -32,10 +39,12 @@ This project builds an end-to-end **condition-monitoring** pipeline for turbofan
 
 **Process (high level):**
 - Reconstruction error is mapped into a normalized HI:
-  $$
-  HI = 1 - \frac{MSE - MSE_{min}}{MSE_{max} - MSE_{min}}
-  $$
-  with clipping to \([0,1]\) for numerical stability.
+
+```math
+\mathrm{HI} = 1 - \frac{\mathrm{MSE} - \mathrm{MSE}_{\min}}{\mathrm{MSE}_{\max} - \mathrm{MSE}_{\min}}
+```
+
+with clipping to $[0,1]$ for numerical stability.
 - A visual **“optimal maintenance” band (0.15–0.35)** is overlaid to illustrate how HI can support decision-making through a practical intervention zone rather than relying only on binary alarms.
 
 ---
